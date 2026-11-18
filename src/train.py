@@ -7,3 +7,13 @@ df = pd.read_csv(data_path)
 
 print(df.head())
 
+print(df.columns)
+
+df["article"] = (
+    df["title"].fillna("").astype(str) +
+    df["text"].fillna("").astype(str)
+).str.strip()
+
+df = df[df["article"] != ""].copy()
+
+df["article_key"] = df["article"].str.lower().str.replace(r"s\+", " ", regex=True).str.strip()
