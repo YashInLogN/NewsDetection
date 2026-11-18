@@ -3,6 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_score, recall_score, f1_score
 from pathlib import Path
 import pandas as pd
+import joblib
 
 project_root = Path(__file__).resolve().parents[1]
 data_path = project_root / "data" / "fake_news_labeled.csv"
@@ -85,3 +86,23 @@ print("Recall: ", recall)
 print("f1: ", f1)
 
 
+error = pd.DataFrame({
+    "article": X_test.reset_index(drop=True),
+    "actual": y_test.reset_index(drop=True),
+    "predicted": y_pred
+})
+
+print(error[["actual", "predicted"]].head())
+
+print(error[error["predicted"] != error["actual"]].shape)
+
+model_path = project_root / "models" / "news_detection.joblib"
+
+model_path.parent.mkdir(parents=True, exist_ok=True)
+
+joblib.dump(
+    {"vectorizer": count_vector, "model": model},
+    model_path
+)
+
+print("Saved model to: ", model_path)
