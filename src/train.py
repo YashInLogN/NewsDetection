@@ -10,10 +10,12 @@ print(df.head())
 print(df.columns)
 
 df["article"] = (
-    df["title"].fillna("").astype(str) +
+    df["title"].fillna("").astype(str) + " " +
     df["text"].fillna("").astype(str)
 ).str.strip()
 
 df = df[df["article"] != ""].copy()
 
 df["article_key"] = df["article"].str.lower().str.replace(r"s\+", " ", regex=True).str.strip()
+
+df = df.drop_duplicates(subset="article_key").copy()
