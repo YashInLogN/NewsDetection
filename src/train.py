@@ -22,7 +22,7 @@ df["article"] = (
 
 df = df[df["article"] != ""].copy()
 
-df["article_key"] = df["article"].str.lower().str.replace(r"s\+", " ", regex=True).str.strip()
+df["article_key"] = df["article"].str.lower().str.replace(r"\s+", " ", regex=True).str.strip()
 
 df = df.drop_duplicates(subset="article_key").copy()
 
