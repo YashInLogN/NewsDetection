@@ -1,3 +1,4 @@
 .ipynb_checkpoints/
 .DS_Store
 fake_news_labeled.csv
+__pycache__
