@@ -1,104 +1,116 @@
 # newsDetection
 
-An educational machine learning project for classifying news article text as **true** or **false** using natural language processing (NLP). The project starts with a TF-IDF and Logistic Regression baseline, then can be extended with other models and evaluation methods.
+An educational NLP and machine learning project that classifies news articles using the labels in the ISOT Fake News Dataset. The current training script uses word counts and Logistic Regression. This is a learning prototype, not a fact-checking service.
 
-> **Important:** This is a research and learning project. A model trained on this dataset cannot reliably determine whether current news is true. It may learn writing style, topic, publisher, or time-period patterns instead of checking claims against evidence.
+## What it does
+
+- Combines each article's headline and body into one text input.
+- Removes empty articles and duplicate article text before splitting the data.
+- Trains on dated articles from 2015–2016 and evaluates on 2017 articles.
+- Converts text into word-count features with `CountVectorizer`.
+- Trains a Logistic Regression classifier and reports accuracy, precision, recall, and F1.
+- Saves the fitted vectorizer and classifier together so predictions use the same vocabulary.
+
+The date split tests whether the model can classify later articles from this dataset. It does not establish that the model can identify false claims in current news. The class balance changes substantially between the training and test periods, and the dataset's labels are tied to different source groups.
 
 ## Dataset
 
-This project uses the [ISOT Fake News Dataset](https://onlineacademiccommunity.uvic.ca/isot/2022/11/27/fake-news-detection-datasets/), published by the Information Security and Object Technology (ISOT) Research Group at the University of Victoria. The original release contains two CSV files, `Fake.csv` and `True.csv`. The combined version adds a `label` column:
+This project uses the [ISOT Fake News Dataset](https://onlineacademiccommunity.uvic.ca/isot/2022/11/27/fake-news-detection-datasets/) from the Information Security and Object Technology (ISOT) Research Group at the University of Victoria. The original files are `Fake.csv` and `True.csv`; the project uses a combined CSV named `fake_news_labeled.csv`.
 
-| Label | Meaning | Rows |
+The original dataset contains 44,898 articles:
+
+| Label | Dataset meaning | Articles |
 | --- | --- | ---: |
-| `false` | Article came from the dataset's fake-news collection | 23,481 |
-| `true` | Article came from the dataset's Reuters collection | 21,417 |
-| **Total** |  | **44,898** |
+| `False` | Article from the dataset's fake-news collection | 23,481 |
+| `True` | Article from the dataset's Reuters collection | 21,417 |
 
-The dataset documentation says the truthful articles were collected from Reuters and the fake articles from outlets identified as unreliable by PolitiFact and Wikipedia. Most examples focus on politics and world news and were collected mainly from 2016–2017. Labels describe the dataset's source-based categories; they are not independent fact-checks of every claim in each article.
-
-### Columns
+The combined file has these columns:
 
 | Column | Description |
 | --- | --- |
 | `title` | Article headline |
 | `text` | Article body |
-| `subject` | Dataset topic/category |
-| `date` | Article publication date as supplied in the source data |
-| `label` | Target class: `false` or `true` |
+| `subject` | Dataset topic or category |
+| `date` | Publication date as supplied by the source |
+| `label` | Target label: `False` or `True` |
 
-Place the combined CSV at `data/fake_news_labeled.csv` when running the project locally. Keep the dataset out of Git if the file is too large or if you have not confirmed the terms for redistributing it. Download the original files from the [ISOT dataset page](https://onlineacademiccommunity.uvic.ca/isot/2022/11/27/fake-news-detection-datasets/) and combine them with labels if needed.
+The dataset documentation says truthful articles were collected from Reuters and fake articles from outlets identified as unreliable by PolitiFact and Wikipedia. Most examples focus on politics and world news, and the articles were collected mainly from 2016–2017. Labels reflect the dataset's collection and source categories; they are not independent fact-checks of every claim.
 
-## Project workflow
-
-1. Inspect and clean the article text; check missing values, duplicates, and label balance.
-2. Split data into training and test sets before fitting preprocessing steps.
-3. Convert text to numeric features with TF-IDF.
-4. Train a baseline classifier such as Logistic Regression or Linear SVM.
-5. Evaluate with precision, recall, F1 score, and a confusion matrix—not accuracy alone.
-6. Review misclassified articles and compare alternative models.
-
-For a stronger evaluation, check for duplicate or near-duplicate stories and consider a time-based or source-aware split. Randomly splitting this dataset can make performance look better than it will be on newer articles because the examples are old and their sources and topics may correlate with labels.
+Place the combined CSV at `data/fake_news_labeled.csv`. The dataset is excluded from Git by the repository's ignore rule. Check the original dataset terms before redistributing it or using it commercially.
 
 ## Getting started
 
-Recommended environment: Python 3.10 or later.
+Use Python 3.10 or later. From the project root, create and activate a virtual environment:
 
 ```bash
-git clone <your-repository-url>
-cd newsDetection
 python -m venv .venv
+source .venv/bin/activate
 ```
 
-Activate the environment:
+On Windows PowerShell, activate it with:
 
-```bash
-# macOS / Linux
-source .venv/bin/activate
-
-# Windows PowerShell
+```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-Install the initial project dependencies:
+Install the listed dependencies:
 
 ```bash
 python -m pip install --upgrade pip
-pip install pandas scikit-learn joblib
+pip install -r requirements.txt
 ```
 
-Put `fake_news_labeled.csv` in the `data/` directory. Model training and prediction commands will be added as the project is built.
+## Train and evaluate
 
-## Suggested repository structure
+From the project root, run:
+
+```bash
+python src/train.py
+```
+
+The script prints the training and test metrics, then saves the fitted CountVectorizer and Logistic Regression model to `models/news_detection.joblib`.
+
+## Make a prediction
+
+`src/predict.py` loads the saved vectorizer and classifier. Replace the example text in its `test_article` variable with a headline and article body, then run:
+
+```bash
+python src/predict.py
+```
+
+The output is the model's predicted dataset label (`True` or `False`). It is a prediction based on learned patterns, not evidence that a claim is factually true or false.
+
+## Project structure
 
 ```text
-newsDetection/
-├── data/                  # Local dataset; usually excluded from Git
-├── models/                # Saved model artifacts (optional)
-├── notebooks/             # Exploration and experiments
-├── src/                   # Data preparation, training, and prediction code
+newsdetection/
+├── data/                  # Local combined dataset; excluded from Git
+├── models/                # Saved model artifacts
+├── notebooks/             # Data exploration and experiments
+├── src/
+│   ├── train.py           # Prepare data, train, evaluate, and save
+│   └── predict.py         # Load saved artifacts and predict a label
 ├── .gitignore
 ├── README.md
 └── requirements.txt
 ```
 
-## Responsible use and limitations
+## Limitations and responsible use
 
-- Treat predictions as experimental signals, not proof that an article is true or false.
-- The dataset is historical, largely English-language, and strongly centered on US politics and world news.
-- Since the two classes came from different source groups, a model may learn publisher or style cues rather than factual accuracy.
-- Check dataset terms and source copyright before redistributing the data or using it commercially. The dataset page provides the download and description; consult its associated papers when using it in research.
+- The dataset is historical and largely focused on English-language political and world news.
+- The label groups come from different source collections, so a model can learn source or writing-style cues instead of claim veracity.
+- A time-based result on this dataset does not measure performance on current articles or unseen publishers.
 - Do not use this model as the sole basis for moderating, ranking, or labeling real-world news.
+- Check source terms and copyright before sharing the data or using it commercially.
 
 ## Citation
 
-If you use the dataset in academic work, cite the dataset authors' papers:
+If you use this dataset in academic work, cite the papers listed in the [official dataset description](https://onlineacademiccommunity.uvic.ca/isot/wp-content/uploads/sites/7295/2023/02/ISOT_Fake_News_Dataset_ReadMe.pdf):
 
 > Ahmed, H., Traore, I., & Saad, S. (2018). “Detecting opinion spams and fake news using text classification.” *Journal of Security and Privacy*, 1(1).
 
 > Ahmed, H., Traore, I., & Saad, S. (2017). “Detection of Online Fake News Using N-Gram Analysis and Machine Learning Techniques.” In *Intelligent, Secure, and Dependable Systems in Distributed and Cloud Environments*, Lecture Notes in Computer Science, vol. 10618, pp. 127–138.
 
-See the [official dataset description](https://onlineacademiccommunity.uvic.ca/isot/wp-content/uploads/sites/7295/2023/02/ISOT_Fake_News_Dataset_ReadMe.pdf) for the dataset details and full citation information.
-
 ## License
 
-No project license has been selected yet. Add a `LICENSE` file before inviting reuse or accepting contributions. Dataset reuse and redistribution may have separate terms from this repository's code; verify the original source terms first.
+No license has been selected for this repository yet. Add a `LICENSE` file before inviting reuse or accepting contributions. Dataset reuse and redistribution may have separate terms from the project code.
