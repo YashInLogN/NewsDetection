@@ -4,3 +4,4 @@ fake_news_labeled.csv
 __pycache__/
 .venv/
 .pytest_cache/
+.vscode/
