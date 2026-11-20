@@ -1,4 +1,6 @@
 .ipynb_checkpoints/
 .DS_Store
 fake_news_labeled.csv
-__pycache__
+__pycache__/
+.venv/
+.pytest_cache/
