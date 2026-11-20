@@ -32,9 +32,9 @@ if st.button("analyze article"):
         prediction = predict_article(article_text, vector, model)
 
         if prediction:
-            st.success("True.")
+            st.success("Model prediction: True (labeled real in the dataset)")
         else:
-            st.warning("False.")
+            st.warning("Model prediction: False (labeled fake in the dataset)")
     
 
 
